@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<layout>
+    <default>
+        <reference name="head">
+            <action method="addCss"><name>css/custom.css</name></action>
+        </reference>
+    </default>
+    <adminhtml_loadoptions_index>
+        <reference name="order_items">
+            <block type="magebit_editcustomoption/adminhtml_loadoptions" parent="order_items" name="root" template="sales/order/view/loadoptions.phtml"  output="toHtml"/>
+        </reference>
+    </adminhtml_loadoptions_index>
+</layout>

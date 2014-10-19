@@ -1,0 +1,165 @@
+<?php
+	/**
+	 * Magebit_Editcustomoption
+	 *
+	 * Magento extension
+	 *
+	 * NOTICE OF LICENSE
+	 * Magento is subject to the Open Software License (OSL 3.0)
+	 *
+	 * @author      Nagy Attila<nagyattila.dev@gmail.com>
+	 * @category    Magebit
+	 * @package     Magebit_Editcustomoption
+	 * @copyright
+	 * @link
+	 * @license
+	 * @version     0.1.0
+	 */
+?>
+<?php
+	$product = $this->loadProduct();
+	$order   = $this->loadOrder();
+	$options = $product->getOptions();
+	foreach( $order->getAllItems() as $item ) {
+		if( $item->getProductId() == $product->getId() ) {
+			$_item           = $item;
+			$selectedOptions = $item->getProductOptions();
+			?>
+			<a href='#' class='custom-cancel' id="custom_cancel" onclick="parentHide(<?php echo $product->getId() ?>)">&times;</a>
+			<table cellspacing="0" class="data order-tables">
+				<col/>
+				<col width="1"/>
+				<col width="1"/>
+				<col width="1"/>
+				<col width="1"/>
+				<col width="1"/>
+				<thead>
+				<tr class="headings">
+					<th><?php echo $this->helper( 'sales' )->__( 'Product' ) ?></th>
+					<th><?php echo $this->helper( 'sales' )->__( 'SKU' ) ?></th>
+					<th><?php echo $this->helper( 'sales' )->__( 'Price' ) ?></th>
+					<th><?php echo $this->helper( 'sales' )->__( 'Qty' ) ?></th>
+					<th><?php echo $this->helper( 'sales' )->__( 'Row Price' ) ?></th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+					<td>
+						<?php echo $item->getName() ?><br/>
+						<ul>
+							<?php foreach( $selectedOptions['options'] as $option ): ?>
+								<li>
+									<?php echo $option['label'].' - '.$option['value']; ?>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</td>
+					<td><?php echo $item->getSku() ?></td>
+					<td><?php echo Mage::helper( "core" )->currency( $item->getPrice() ) ?></td>
+					<td><?php echo round( $item->getQtyOrdered(), 0 ) ?></td>
+					<td><?php echo Mage::helper( "core" )->currency( $item->getPrice() * $item->getQtyOrdered() ) ?></td>
+				</tr>
+				</tbody>
+			</table>
+		<?php
+		}
+	}
+?>
+<form method="get" name="saveOptions" id="saveOptions" action="<?php echo Mage::helper( "adminhtml" )->getUrl( "adminhtml/loadoptions/save/" ) ?>">
+	<input type="hidden" name="order_id" value="<?php echo $order->getId(); ?>"/>
+	<input type="hidden" name="product_id" value="<?php echo $product->getId(); ?>"/>
+	<ul>
+		<?php
+			$selectedCustomOPtions = $selectedOptions['info_buyRequest']['options'];
+			#loop through the options
+			foreach( $options as $optionKey => $optionVal ):?>
+				<?php
+				$optType    = $optionVal->getType();
+				$optTitle   = $optionVal->getTitle();
+				$isRequired = $optionVal->getIsRequire();
+
+				$optionId = $optionVal->getId();
+				$currency = Mage::app()->getLocale()->currency( Mage::app()->getStore()->getCurrentCurrencyCode() )->getSymbol();
+
+				/* -- dorp_down -- */
+
+				if( $optType == 'drop_down' && array_key_exists( $optionId, $selectedCustomOPtions ) ):?>
+					<li>
+						<span class='optionLabel'><?php echo $optTitle ?></span><br/>
+						<select id='sel<?php echo $product->getId().$optionVal->getId() ?>' name='options[<?php echo $optionVal->getId() ?>]'>
+							<option title='0'><?php $this->__( 'Select' ).$optTitle; ?></option>
+							<?php foreach( $optionVal->getValues() as $valuesKey => $valuesVal ): ?>
+								<?php $disabled = ( $valuesVal->getPrice() != 0 ) ? 'disabled' : ''; ?>
+								<?php $selected = ( $selectedCustomOPtions[$optionId] == $valuesVal->getId() ) ? 'selected="selected"' : ''; ?>
+								<option <?php echo $selected.' '.$disabled; ?> data-label='<?php echo $valuesVal->getTitle() ?>' title='<?php echo $valuesVal->getPrice() ?>' value='<?php echo $valuesVal->getId() ?>'><?php echo $valuesVal->getTitle().' + '.$this->helper( 'editcustomoption' )->getPriceHtml( $valuesVal->getPrice() ) ?></option>
+							<?php endforeach; ?>
+						</select>
+					</li>
+				<?php
+
+				/* -- radio -- */
+
+				elseif( $optType == 'radio' ): ?>
+					<li>
+						<span class='optionLabel'><?php echo $optTitle ?></span><br/>
+
+						<div class='optOpt'>
+							<?php foreach( $optionVal->getValues() as $valuesKey => $valuesVal ): ?>
+								<?php $selected = ( $selectedCustomOPtions[$optionId] == $valuesVal->getId() ) ? 'checked' : ''; ?>
+								<?php $disabled = ( $valuesVal->getPrice() != 0 && !$selected ) ? 'disabled' : ''; ?>
+								<input <?php echo $selected.' '.$disabled; ?> type="radio" name='options[<?php echo $optionVal->getId() ?>]' value='<?php echo $valuesVal->getId() ?>'/> <?php echo $valuesVal->getTitle().' + '.$this->helper( 'editcustomoption' )->getPriceHtml( $valuesVal->getPrice() ) ?>
+								<br/>
+							<?php endforeach; ?>
+						</div>
+					</li>
+				<?php
+
+				/* -- field -- */
+
+				elseif( $optType == 'field' ) : ?>
+					<li>
+						<span class='optionLabel'><?php echo $optTitle.' + '.$this->helper( 'editcustomoption' )->getPriceHtml( $optionVal->getDefaultPrice() ) ?></span>
+					</li>
+				<?php
+
+				/* -- date -- */
+
+				elseif( $optType == 'date' ) : ?>
+					<li>
+						<span class='optionLabel'><?php echo $optTitle.' + '.$this->helper( 'editcustomoption' )->getPriceHtml( $optionVal->getDefaultPrice() ) ?></span>
+					</li>
+				<?php
+
+				/* -- checkbox -- */
+
+				elseif( $optType == 'checkbox' ) : ?>
+					<li>
+						<span class='optionLabel'><?php echo $optTitle ?></span><br/>
+						<?php foreach( $optionVal->getValues() as $valuesKey => $valuesVal ): ?>
+							<?php $selected = ( in_array( $valuesVal->getId(), $selectedCustomOPtions[$optionId] ) ) ? 'checked' : ''; ?>
+							<?php $disabled = ( $valuesVal->getPrice() != 0 && !$selected ) ? 'disabled' : ''; ?>
+							<?php // print_r($selectedCustomOPtions[$optionId][0]).'<br>';echo '<pre>';print_r($valuesVal->toArray());echo '</pre>';?>
+							<input <?php echo $selected.' '.$disabled; ?> type="checkbox" name='options[<?php echo $optionVal->getId() ?>][]' value='<?php echo $valuesVal->getId() ?>'/> <?php echo $valuesVal->getTitle().' + '.$this->helper( 'editcustomoption' )->getPriceHtml( $valuesVal->getPrice() ) ?>
+							<br/>
+						<?php endforeach; ?>
+					</li>
+				<?php
+
+				/* -- multiselect -- */
+
+				elseif( $optType == 'multiple' ):?>
+					<li>
+						<span class='optionLabel'><?php echo $optTitle ?></span><br/>
+						<select id='sel<?php echo $product->getId().$optionVal->getId() ?>' name='options[<?php echo $optionVal->getId() ?>][]' multiple>
+							<?php foreach( $optionVal->getValues() as $valuesKey => $valuesVal ): ?>
+								<?php $selected = ( in_array( $valuesVal->getId(), $selectedCustomOPtions[$optionId] ) ) ? 'selected="selected"' : ''; ?>
+								<?php $disabled = ( $valuesVal->getPrice() != 0 && !$selected ) ? 'disabled' : ''; ?>
+								<option <?php echo $selected.' '.$disabled; ?> data-label='<?php echo $valuesVal->getTitle() ?>' title='<?php echo $valuesVal->getPrice() ?>' value='<?php echo $valuesVal->getId() ?>'><?php echo $valuesVal->getTitle().' '.$this->helper( 'editcustomoption' )->getPriceHtml( $valuesVal->getPrice() ) ?></option>
+							<?php endforeach; ?>
+						</select>
+					</li>
+				<?php endif; ?>
+			<?php endforeach; ?>
+			<br><button class="submit-otions">Submit</button>
+			<p><small>*<?php echo $this->__('Only options with price $0.00 - could be selected!') ?></small></p>
+</form>

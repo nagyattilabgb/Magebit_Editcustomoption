@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+
+<config>
+    <modules>
+        <Magebit_Editcustomoption>
+            <version>0.1.0</version>
+        </Magebit_Editcustomoption>
+    </modules>
+
+    <global>
+        <helpers>
+            <editcustomoption>
+                <class>Magebit_Editcustomoption_Helper</class>
+            </editcustomoption>
+        </helpers>
+
+        <blocks>
+           <magebit_editcustomoption>
+			   <class>Magebit_Editcustomoption_Block</class>
+		   </magebit_editcustomoption>
+            <adminhtml>
+                <rewrite>
+                    <sales_order_view_items_renderer_default>Magebit_Editcustomoption_Block_Adminhtml_Sales_Order_View_Items_Renderer_Default</sales_order_view_items_renderer_default>
+                </rewrite>
+            </adminhtml>
+        </blocks>
+    </global>
+
+    <admin>
+        <routers>
+            <adminhtml>
+                <use>admin</use>
+                <args>
+                    <module>Mage_Adminhtml</module>
+                    <frontName>admin</frontName>
+                </args>
+                <args>
+                    <modules>
+                        <magebit_editcustomoption after="Mage_Adminhtml">Magebit_Editcustomoption_Adminhtml</magebit_editcustomoption>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+
+    <adminhtml>
+        <layout>
+            <updates>
+                <magebit_editcustomoption>
+                    <file>editcustomoption.xml</file>
+                </magebit_editcustomoption>
+            </updates>
+        </layout>
+    </adminhtml>
+
+
+    <stores>
+        <admin>
+            <!--  default admin design package and theme -->
+            <design>
+                <package>
+                    <name>default</name>
+                </package>
+                <theme>
+                    <default>magebit_editcustomoption</default>
+                </theme>
+            </design>
+
+            <!-- enabble backend template path hints -->
+            <dev>
+                <debug>
+                    <template_hints>0</template_hints>
+                    <template_hints_blocks>0</template_hints_blocks>
+                </debug>
+            </dev>
+        </admin>
+    </stores>
+
+</config>
