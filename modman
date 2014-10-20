@@ -1,0 +1,5 @@
+app/code/local/Magebit/Editcustomoption app/code/local/Magebit/Editcustomoption
+app/design/adminhtml/default/magebit_editcustomoption/layout/editcustomoption.xml app/design/adminhtml/default/magebit_editcustomoption/layout/editcustomoption.xml
+app/design/adminhtml/default/magebit_editcustomoption/template app/design/adminhtml/default/magebit_editcustomoption/template
+app/etc/modules/Magebit_Editcustomoption.xml app/etc/modules/Magebit_Editcustomoption.xml
+skin/adminhtml/default/magebit_editcustomoption skin/adminhtml/default/magebit_editcustomoption
